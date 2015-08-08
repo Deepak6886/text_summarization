@@ -1,2 +1,2 @@
 # text_summarization
-Text Summarization
+Text Summarization Algorithm in R
