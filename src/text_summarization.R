@@ -17,18 +17,20 @@ options(scipen = 8)
 
 # retrieve techcrunch and new york times articles
 # through facebook posts on their pages respectively
-token <- "your_token"
+token <- "CAACEdEose0cBAHZA3v9flW4RzvAzHWr2xM08MNLXTsd0MzZCKVez7XSc0Yg2ZCHdXHLmNti2vVUvGZCZBolHQixSayaZAuZBT4toq50DY6UOFSGVzQeJBqFMkhh9VVfPZBnTksZAcwoiIZCJG9FuFE3A8wOH1FUm0wEzWfnE10s2Yr0dr7Oq385AQau5vS59DkNWtHQXkz4SuXJwfrHwIoBVgP"
 tc <- getPage("techcrunch", token, n = 100)
 tc_web <- html(tc[1,6])
-tc_title <- tc_web %>% html_nodes(".tweet-title , p") %>% html_text()
-tc_article <- tc_web %>% html_nodes("p") %>% html_next()
+tc_title <- tc_web %>% html_node(".tweet-title , p") %>% html_text()
+tc_article <- tc_web %>% html_nodes("p") %>% html_text()
 tc_article <- gsub("\n", "", tc_article)
+tc_article <- tc_article[tc_article != ""]
 
 ny <- getPage("nytimes", token, n = 100)
 ny_web <- html(ny[1,6])
 ny_title <- ny_web %>% html_nodes("#story-heading") %>% html_text()
 ny_article <- ny_web %>% html_nodes(".story-content") %>% html_text()
 ny_article <- gsub("\n", "", ny_article)
+ny_article <- ny_article[ny_article != ""]
 
 
 # naive article summarization algorithm
@@ -64,7 +66,7 @@ naive_sumly <- function(text, method = "bing")
     
     paras <- unlist(strsplit(agg_txt, split = "\n\n", fixed = T))
     cat(identical(paras, text))
-    cat("\n")
+    cat("\n\n")
     
     best_sens <- rep(NA, length(paras))
     max_para_vals <- rep(NA, length(paras))
@@ -76,11 +78,16 @@ naive_sumly <- function(text, method = "bing")
       para_sens <- get_sentences(p)
       for (s in para_sens)
       {
-        m <- dt[sentence == as.character(s), total_sim]
+        m <- dat[grepl(s, sentence, fixed = TRUE),]$total_sim
         if (m > max_para_val)
         {
           max_para_val <- m
           best_sen <- as.character(s)
+        }
+        else
+        {
+          max_para_val <- max_para_val
+          best_sen <- best_sen
         }
       }
       best_sens[i] <- best_sen
@@ -91,6 +98,10 @@ naive_sumly <- function(text, method = "bing")
       cat(max_para_val)
       cat("\n\n")
     }
+    best_sens <- best_sens[which(max_para_vals != 0)]
+    max_para_vals <- max_para_vals[which(max_para_vals != 0)]
+    #best_sens <- best_sens[which(max_para_vals > mean(dat$total_sim))]
+    #max_para_vals <- max_para_vals[which(max_para_vals > mean(dat$total_sim))]
     return(list(summary = best_sens, max_sim_values = max_para_vals))
   }
   else
@@ -100,8 +111,4 @@ naive_sumly <- function(text, method = "bing")
 }
 
 # summary example
-trunc_article <- naive_sumly(text = ny_article)
-
-
-
-
+trunc_article <- naive_sumly(text = tc_article)
