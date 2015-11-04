@@ -17,7 +17,7 @@ options(scipen = 8)
 
 # retrieve techcrunch and new york times articles
 # through facebook posts on their pages respectively
-token <- "CAACEdEose0cBAHZA3v9flW4RzvAzHWr2xM08MNLXTsd0MzZCKVez7XSc0Yg2ZCHdXHLmNti2vVUvGZCZBolHQixSayaZAuZBT4toq50DY6UOFSGVzQeJBqFMkhh9VVfPZBnTksZAcwoiIZCJG9FuFE3A8wOH1FUm0wEzWfnE10s2Yr0dr7Oq385AQau5vS59DkNWtHQXkz4SuXJwfrHwIoBVgP"
+token <- "your_own_token"
 tc <- getPage("techcrunch", token, n = 100)
 tc_web <- html(tc[1,6])
 tc_title <- tc_web %>% html_node(".tweet-title , p") %>% html_text()
@@ -31,7 +31,6 @@ ny_title <- ny_web %>% html_nodes("#story-heading") %>% html_text()
 ny_article <- ny_web %>% html_nodes(".story-content") %>% html_text()
 ny_article <- gsub("\n", "", ny_article)
 ny_article <- ny_article[ny_article != ""]
-
 
 # naive article summarization algorithm
 naive_sumly <- function(text, method = "bing")
